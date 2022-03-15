@@ -26,6 +26,7 @@
   </div>
 </template>
 <script setup lang="ts">
+// @ts-ignore
 import NewInput from "../../components/NewInput.vue";
 import { ElMessage } from 'element-plus'
 import { useRouter, useRoute } from 'vue-router'
@@ -44,7 +45,7 @@ const router = useRouter()
 const inputList = [
   {
     label: "用户名",
-    placeholder: "输入用户名",
+    placeholder: "输入用户名(工号)",
     getValue: getUserName,
     regular: "^([0-9]|[a-z]|[A-Z]){0,4}$",
     errText: "用户名格式不正确",
