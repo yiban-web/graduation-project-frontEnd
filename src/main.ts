@@ -18,11 +18,15 @@ const routes = [
     path:'/main',name:'main',component:import('./pages/MainPage/index.vue'),children:[
       {
         path:'had',
-        component:import('./pages/MainPage/HadViocePage.vue')
+        component:import('./pages/MainPage/HadVoicePage.vue')
       },
       {
         path:'record',
         component:import('./pages/MainPage/recordVoicePage.vue')
+      },
+      {
+        path:'detail',
+        component:import('./pages/MainPage/DetailPage.vue')
       }
     ]
   }

@@ -17,7 +17,6 @@
             <el-popconfirm
               title="确定删除此文件吗？"
               @confirm="handleDelete(scope.row.id)"
-              @cancel="handleDelete(scope.row.id)"
               confirm-button-text="确定"
               cancel-button-text="取消"
             >
@@ -28,18 +27,23 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination
-        :page-size="20"
-        :pager-count="11"
-        layout="prev, pager, next"
-        background
-        :total="1000"
-      />
+      <div class="pageination">
+        <el-pagination
+          :page-size="10"
+          :pager-count="11"
+          layout="prev, pager, next"
+          background
+          :total="100"
+          @current-change="changePage"
+        />
+      </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { reactive, ref } from "vue";
+import {useRouter} from "vue-router"
+const router = useRouter()
 const voiceList = [
   {
     id: 1,
@@ -56,9 +60,16 @@ const voiceList = [
 ];
 function lookDetail(id: number) {
   console.log(id);
+  router.push({
+      path:'/main/detail',
+      query:{id}
+  })
 }
 function handleDelete(id: number) {
   console.log(id);
+}
+function changePage(pageNow: number) {
+  console.log(pageNow);
 }
 </script>
 <style lang="less" scoped>
@@ -74,5 +85,10 @@ function handleDelete(id: number) {
     margin: 0;
     text-align: center;
   }
+}
+.pageination {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
 }
 </style>
