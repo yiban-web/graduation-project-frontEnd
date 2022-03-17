@@ -105,7 +105,7 @@
 }
 .main-content{
     flex: 1;
-    padding: 5px 15px;
+    padding: 15px 15px;
 
 }
 </style>
