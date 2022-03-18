@@ -12,7 +12,7 @@
           :errText="item.errText"
           class="input-item"
           :label="item.label"
-          :inputType="item.password"
+          :inputType="item.inputType"
           :showPassword="item.showPassword"
           :clearable="item.clearable"
         ></new-input>

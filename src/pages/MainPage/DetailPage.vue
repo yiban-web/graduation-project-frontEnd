@@ -1,24 +1,28 @@
 <!-- 语音详情页 -->
 <template>
-  <div>
-    <div class="back-box">
-      <img :src="back" alt="" srcset="" @click="goback" />
-      <span class="back" @click="goback">返回</span>
-    </div>
-    <!-- <p>{{ `语音详情 id=${voiceId}` }}</p> -->
-    <p>语音名称：<span>aushduiasbk.mp3</span></p>
-    <div class="player" :style="{ width: `${voiceTimeLong*7+120}px` }">
-      <img :src="playState ? pause : play" alt="" @click="changePlayState" />
-      <span>{{ `${voiceTimeLong-playedTime}s` }}</span>
-      <div class="lines" id="player-lines"></div>
-    </div>
-  </div>
+	<div>
+		<div class="back-box">
+			<img :src="back" alt="" srcset="" @click="goback" />
+			<span class="back" @click="goback">返回</span>
+		</div>
+		<!-- <p>{{ `语音详情 id=${voiceId}` }}</p> -->
+		<p>语音名称：<span>aushduiasbk.mp3</span></p>
+		<div class="player" :style="{ width: `${voiceTimeLong * 7 + 120}px` }">
+			<img :src="playState ? pause : play" alt="" @click="changePlayState" />
+			<span>{{ `${dayjs(timeDayJs).format("mm:ss")}` }}</span>
+			<div class="lines" id="player-lines"></div>
+		</div>
+	</div>
 </template>
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import dayjs from "dayjs";
+// @ts-ignore
 import back from "../../assets/back.png";
+// @ts-ignore
 import pause from "../../assets/pause.png";
+// @ts-ignore
 import play from "../../assets/play.png";
 const voiceId = useRoute().query.id;
 const router = useRouter();
@@ -27,95 +31,101 @@ const playerWidth = 200;
 // 播放状态，0暂停 1播放
 const playState = ref(0);
 
-const linesNode = ref(null);
+const linesNode = ref();
 
+// 播放的时长
 const playedTime = ref(0);
 
 // 音频总时长
 const voiceTimeLong = 10;
+let timeDayJs = ref(dayjs().minute(voiceTimeLong/60).second(voiceTimeLong%60))
 
-let timer = null;
+let timer: number | null | undefined = null;
 
 function changePlayState() {
-  playState.value === 1 ? clearTimeout(timer) : count();
-  playState.value = (playState.value + 1) % 2;
+	playState.value === 1 ? clearTimeout(timer||undefined) : count();
+	playState.value = (playState.value + 1) % 2;
 }
 function goback() {
-  router.go(-1);
+	router.go(-1);
 }
+
+// 创建音频波形
 function creatLineItem() {
-  playedTime.value++;
-  const newLine = document.createElement("div");
-  newLine.className = "lines-item";
-  newLine.style.height = `${Math.floor(Math.random() * (25 - 5 + 1)) + 1}px`;
-  newLine.style.width = "2px";
-  newLine.style.backgroundColor = "white";
-  newLine.style.marginRight = "5px";
-  linesNode.value.appendChild(newLine);
+	playedTime.value++;
+    timeDayJs.value = dayjs(timeDayJs.value).subtract(1,'second')
+	const newLine = document.createElement("div");
+	newLine.className = "lines-item";
+	newLine.style.height = `${Math.floor(Math.random() * (25 - 5 + 1)) + 1}px`;
+	newLine.style.width = "2px";
+	newLine.style.backgroundColor = "white";
+	newLine.style.marginRight = "5px";
+	linesNode.value?.appendChild(newLine);
 }
 function count() {
-  timer = setTimeout(() => {
-    creatLineItem();
-    count();
-  }, 1000);
+	timer = setTimeout(() => {
+		creatLineItem();
+		count();
+	}, 1000);
 }
 
 watch(playedTime, (value, old) => {
-  if (value >= voiceTimeLong) {
-    playState.value = 0;
-    playedTime.value = 0;
-    linesNode.value.innerHTML=''
-    clearTimeout(timer);
-  }
+	if (value >= voiceTimeLong) {
+		playState.value = 0;
+		playedTime.value = 0;
+		linesNode.value.innerHTML = "";
+		timeDayJs.value = dayjs().minute(voiceTimeLong/60).second(voiceTimeLong%60)
+		clearTimeout(timer||undefined);
+	}
 });
 onMounted(() => {
-  linesNode.value = document.querySelector("#player-lines");
-  //console.log(linesNode.value)
+	linesNode.value = document.querySelector("#player-lines");
+	//console.log(linesNode.value)
 });
 </script>
 
 <style lang="less" scoped>
 .back-box {
-  align-items: center;
-  display: flex;
+	align-items: center;
+	display: flex;
 
-  img {
-    width: 20px;
-    cursor: pointer;
-    height: 20px;
-  }
+	img {
+		width: 20px;
+		cursor: pointer;
+		height: 20px;
+	}
 }
 .back {
-  color: var(--el-color-info-light-3);
-  font-size: 0.8rem;
-  cursor: pointer;
-  margin-left: 5px;
+	color: var(--el-color-info-light-3);
+	font-size: 0.8rem;
+	cursor: pointer;
+	margin-left: 5px;
 }
 
 .player {
-  background-color: var(--el-color-info-dark-2);
-  height: 32px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  span{
-      color: white;
-      margin: 0 5px;
-  }
-  img {
-    cursor: pointer;
-  }
-  .lines {
-    // margin-left: 10px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    &-item {
-      width: 2px;
-      height: 15px;
-      background-color: white;
-      margin-right: 5px;
-    }
-  }
+	background-color: var(--el-color-info-dark-2);
+	height: 32px;
+	border-radius: 20px;
+	display: flex;
+	align-items: center;
+	span {
+		color: white;
+		margin: 0 5px;
+	}
+	img {
+		cursor: pointer;
+	}
+	.lines {
+		// margin-left: 10px;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		&-item {
+			width: 2px;
+			height: 15px;
+			background-color: white;
+			margin-right: 5px;
+		}
+	}
 }
 </style>
