@@ -13,21 +13,24 @@
             :errText="item.errText"
             class="input-item"
             :label="item.label"
-            :inputType="item.password"
+            :inputType="item.inputType"
             :showPassword="item.showPassword"
             :clearable="item.clearable"
           ></new-input>
         </div>
 
-        <div class="btn">
-          <el-button type="primary" :disabled="canSubmit">注册</el-button>
-        </div>
+        <div class="btns">
+        <el-button @click="goback">返回</el-button>
+        <el-button  :disabled="canSubmit" type="primary">注册</el-button>
+      </div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
+const router = useRouter()
 const userName = reactive({
   value: "",
   state: false,
@@ -75,6 +78,12 @@ const inputList = [
 const canSubmit = computed(()=>{
     return !(userName.state&&passwordFir.state&&passwordSec.state)
 })
+
+function goback(){
+  router.replace({
+    path:'log'
+  })
+}
 function getUserName(params: string, state: boolean) {
   userName.value = params;
   userName.state = state;

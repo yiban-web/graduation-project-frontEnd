@@ -1,44 +1,55 @@
 import { createApp } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 import log from "./pages/LogPage/index.vue";
-import register from './pages/RegisterPage.vue'
-import main from './pages/LookHadVoicePage/index.vue'
-import 'element-plus/dist/index.css'
+import register from "./pages/RegisterPage.vue";
+import main from "./pages/LookHadVoicePage/index.vue";
+import "element-plus/dist/index.css";
 
 // 路由
 const routes = [
-  { path: "/", redirect:()=>{
-    return {path:'/log'}
-  } },
-  { path: "/log", component: log },
-  {
-    path:'/register',name:'register',component:register
-  },
-  {
-    path:'/main',name:'main',component:import('./pages/MainPage/index.vue'),children:[
-      {
-        path:'had',
-        component:import('./pages/MainPage/HadVoicePage.vue')
-      },
-      {
-        path:'record',
-        component:import('./pages/MainPage/recordVoicePage.vue')
-      },
-      {
-        path:'detail',
-        component:import('./pages/MainPage/DetailPage.vue')
-      }
-    ]
-  }
+	{
+		path: "/",
+		redirect: () => {
+			return { path: "/log" };
+		},
+	},
+	{ path: "/log", component: log },
+	{
+		path: "/register",
+		name: "register",
+		component: register,
+	},
+	{
+		path: "/main",
+		name: "main",
+		component: import("./pages/MainPage/index.vue"),
+    register:()=>{
+      return {path:'main/had'}
+    },
+		children: [
+			{
+				path: "had",
+				component: import("./pages/MainPage/HadVoicePage.vue"),
+			},
+			{
+				path: "record",
+				component: import("./pages/MainPage/recordVoicePage.vue"),
+			},
+			{
+				path: "detail",
+				component: import("./pages/MainPage/DetailPage.vue"),
+			},
+		],
+	},
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
-  routes,
+	history: createWebHashHistory(),
+	routes,
 });
 
 createApp({
-  template: ` <router-view></router-view>`,
+	template: ` <router-view></router-view>`,
 })
-  .use(router)
-  .mount("#app");
+	.use(router)
+	.mount("#app");

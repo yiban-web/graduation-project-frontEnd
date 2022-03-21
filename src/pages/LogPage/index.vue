@@ -78,6 +78,9 @@ function submit() {
       message: "接口还没写，就当成功了吧",
       type: "warning",
     });
+    router.push({
+      path:'/main/had'
+    })
 }
 
 function goRegister() {

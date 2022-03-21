@@ -1,22 +1,41 @@
 <!-- 语音详情页 -->
 <template>
-	<div>
+	<div style="font-size: 0.85rem;">
 		<div class="back-box">
 			<img :src="back" alt="" srcset="" @click="goback" />
 			<span class="back" @click="goback">返回</span>
 		</div>
-		<!-- <p>{{ `语音详情 id=${voiceId}` }}</p> -->
+		<p>{{ `语音详情 id=${voiceId}` }}</p>
 		<p>语音名称：<span>aushduiasbk.mp3</span></p>
-		<div class="player" :style="{ width: `${voiceTimeLong * 7 + 120}px` }">
-			<img :src="playState ? pause : play" alt="" @click="changePlayState" />
-			<span>{{ `${dayjs(timeDayJs).format("mm:ss")}` }}</span>
-			<div class="lines" id="player-lines"></div>
+		<voice-player
+			:voice-url="voiceUrl"
+			:voice-time-long="voiceTimeLong"
+		></voice-player>
+		<p class="grade">最终得分：<span>90</span></p>
+		<hr  SIZE=1 class="cut-off">
+		<div class="keys-tags">
+			<p>关键字标签：</p>
+			<div class="keys-tags-all">
+				<div class='keys-tags-item' v-for="(item,index) in voiceTagsList" :key="index">
+					<span>{{item}}</span>
+				</div>
+			</div>
+		</div>
+		<hr  SIZE=1 class="cut-off">
+		<el-link type="info" @click="showText = !showText">{{`${showText?'关闭':'展开'}文本`}}</el-link>
+		<div v-show="showText">
+			<!-- 具体文本显示 -->
+			<new-textarea></new-textarea>
 		</div>
 	</div>
 </template>
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
+// @ts-ignore
+import VoicePlayer from "../../components/VoicePlayer.vue";
+// @ts-ignore
+import NewTextarea from "../../components/NewTextarea.vue"
 import dayjs from "dayjs";
 // @ts-ignore
 import back from "../../assets/back.png";
@@ -28,62 +47,27 @@ const voiceId = useRoute().query.id;
 const router = useRouter();
 const playerWidth = 200;
 
+const showText = ref(false)
+
 // 播放状态，0暂停 1播放
 const playState = ref(0);
 
-const linesNode = ref();
+// 音频地址
+const voiceUrl = ref(`../../assets/4461c2ce0c64dd14.mp3`);
 
 // 播放的时长
-const playedTime = ref(0);
+const playedTime = ref(0)
 
 // 音频总时长
-const voiceTimeLong = 10;
-let timeDayJs = ref(dayjs().minute(voiceTimeLong/60).second(voiceTimeLong%60))
+const voiceTimeLong = 16;
 
-let timer: number | null | undefined = null;
+const voiceTagsList = ['银行客服','公安']
 
-function changePlayState() {
-	playState.value === 1 ? clearTimeout(timer||undefined) : count();
-	playState.value = (playState.value + 1) % 2;
-}
 function goback() {
 	router.go(-1);
 }
-
-// 创建音频波形
-function creatLineItem() {
-	playedTime.value++;
-    timeDayJs.value = dayjs(timeDayJs.value).subtract(1,'second')
-	const newLine = document.createElement("div");
-	newLine.className = "lines-item";
-	newLine.style.height = `${Math.floor(Math.random() * (25 - 5 + 1)) + 1}px`;
-	newLine.style.width = "2px";
-	newLine.style.backgroundColor = "white";
-	newLine.style.marginRight = "5px";
-	linesNode.value?.appendChild(newLine);
-}
-function count() {
-	timer = setTimeout(() => {
-		creatLineItem();
-		count();
-	}, 1000);
-}
-
-watch(playedTime, (value, old) => {
-	if (value >= voiceTimeLong) {
-		playState.value = 0;
-		playedTime.value = 0;
-		linesNode.value.innerHTML = "";
-		timeDayJs.value = dayjs().minute(voiceTimeLong/60).second(voiceTimeLong%60)
-		clearTimeout(timer||undefined);
-	}
-});
-onMounted(() => {
-	linesNode.value = document.querySelector("#player-lines");
-	//console.log(linesNode.value)
-});
 </script>
-
+  
 <style lang="less" scoped>
 .back-box {
 	align-items: center;
@@ -102,30 +86,34 @@ onMounted(() => {
 	margin-left: 5px;
 }
 
-.player {
-	background-color: var(--el-color-info-dark-2);
-	height: 32px;
-	border-radius: 20px;
-	display: flex;
-	align-items: center;
+.grade {
 	span {
-		color: white;
-		margin: 0 5px;
+		font-size: 1.4rem;
+		font-weight: 600;
+		color: #ff9900;
 	}
-	img {
-		cursor: pointer;
-	}
-	.lines {
-		// margin-left: 10px;
-		height: 100%;
+}
+
+.keys-tags {
+	text-align: 0.85rem;
+	&-all {
 		display: flex;
-		align-items: center;
-		&-item {
-			width: 2px;
-			height: 15px;
-			background-color: white;
-			margin-right: 5px;
-		}
+		flex-wrap: wrap;
 	}
+	&-item {
+		@color:#006699;
+		padding: 4px 6px;
+		// background-color: #0099CC;
+		border-radius: 10px;
+		box-shadow: 1px 1px 4px 1px #0099cca6;
+		margin-right: 12px;
+		border: @color solid 1px;
+		color:@color
+	}
+}
+.cut-off{
+	width: 100%;
+	color: var(--el-color-info-light-3);
+	margin-top: 15px;
 }
 </style>
