@@ -17,5 +17,15 @@ export default defineConfig({
     })],
   alias:{
     'vue': 'vue/dist/vue.esm-bundler.js'
+  },
+  server:{
+    // host:'voice-detection',
+    proxy:{
+      '/test': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/test/, '')
+      },
+    }
   }
 })

@@ -3,7 +3,7 @@
 		<div class="head">
 			<p class="head-title">大规模语音数据智能质检系统</p>
 			<div class="head-user" @click="logout">
-				<p>您好，3180911065</p>
+				<p>您好，{{username}}</p>
 				<img :src="退出" alt="" srcset="" />
 			</div>
 		</div>
@@ -29,6 +29,7 @@
 </template>
 <script setup lang="ts">
 import { ElMessageBox } from "element-plus";
+import Cookies from "js-cookie";
 import { reactive, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 // @ts-ignore
@@ -42,6 +43,8 @@ const barList = [
 ];
 
 const choosedBar = ref(0);
+
+const username = Cookies.get('username')
 
 function goto(path: string, id: number) {
 	choosedBar.value = id;
@@ -57,6 +60,7 @@ function logout() {
 		type: "warning",
 	})
 		.then(() => {
+			Cookies.remove('username')
 			router.replace({
 				path: `/log`,
 			});

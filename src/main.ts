@@ -1,52 +1,9 @@
 import { createApp } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 import log from "./pages/LogPage/index.vue";
-import register from "./pages/RegisterPage.vue";
-import main from "./pages/LookHadVoicePage/index.vue";
+import register from "./pages/RegisterPage/index.vue";
 import "element-plus/dist/index.css";
-
-// 路由
-const routes = [
-	{
-		path: "/",
-		redirect: () => {
-			return { path: "/log" };
-		},
-	},
-	{ path: "/log", component: log },
-	{
-		path: "/register",
-		name: "register",
-		component: register,
-	},
-	{
-		path: "/main",
-		name: "main",
-		component: import("./pages/MainPage/index.vue"),
-    register:()=>{
-      return {path:'main/had'}
-    },
-		children: [
-			{
-				path: "had",
-				component: import("./pages/MainPage/HadVoicePage.vue"),
-			},
-			{
-				path: "record",
-				component: import("./pages/MainPage/recordVoicePage.vue"),
-			},
-			{
-				path: "detail",
-				component: import("./pages/MainPage/DetailPage.vue"),
-			},
-		],
-	},
-];
-
-const router = createRouter({
-	history: createWebHashHistory(),
-	routes,
-});
+import {router} from './route'
 
 createApp({
 	template: ` <router-view></router-view>`,

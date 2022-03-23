@@ -21,7 +21,7 @@
 
         <div class="btns">
         <el-button @click="goback">返回</el-button>
-        <el-button  :disabled="canSubmit" type="primary">注册</el-button>
+        <el-button  :disabled="canSubmit" type="primary" @click="submit">注册</el-button>
       </div>
       </div>
     </div>
@@ -30,6 +30,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { successTip } from "../../tools";
+import {registerApi} from './api'
 const router = useRouter()
 const userName = reactive({
   value: "",
@@ -48,7 +50,7 @@ const inputList = [
     label: "用户名",
     placeholder: "输入用户名(工号)",
     getValue: getUserName,
-    regular: "^([0-9]|[a-z]|[A-Z]){0,4}$",
+    regular: "^([0-9]|[a-z]|[A-Z]){0,11}$",
     errText: "用户名格式不正确",
     showPassword: false,
     clearable: true,
@@ -99,9 +101,21 @@ function getPasswordSec(params: string, state: boolean) {
   passwordSec.state = state&&params===passwordFir.value;
 }
 
+// 提交
+async function submit() {
+  const data = await registerApi({
+    username:userName.value,
+    password:passwordSec.value
+  })
+  if(data.code===200){
+    successTip('注册成功')
+    setTimeout(goback,1000)
+  }
+}
+
 </script>
 <style lang="less" scoped>
-@import url('./index.less');
+@import url('../index.less');
 .btn{
     width: 50%;
     margin: auto;
