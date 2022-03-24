@@ -30,10 +30,10 @@
 			<div class="pageination">
 				<el-pagination
 					:page-size="10"
-					:pager-count="11"
+					:pager-count="pageCount"
 					layout="prev, pager, next"
 					background
-					:total="100"
+					:total="fileCount"
 					@current-change="changePage"
 				/>
 			</div>
@@ -41,9 +41,28 @@
 	</div>
 </template>
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { onBeforeMount, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { haveFilesNum } from "./api";
 const router = useRouter();
+const fileCount = ref(0);
+const pageCount = ref(0);
+const pageSize = 10;
+
+// @ts-ignore
+onBeforeMount(async () => {
+	await haveFilesNum()
+		.then((res) => {
+			console.log(res);
+			if (res.code === 200) {
+				fileCount.value = res.data?.fileCount;
+				pageCount.value = Math.ceil(res.data?.fileCount / pageSize);
+			}
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+});
 const voiceList = [
 	{
 		id: 1,

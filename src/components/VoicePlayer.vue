@@ -1,15 +1,13 @@
 <!-- 音频播放器组件 -->
 <template>
-	<div class="player" :style="{ width: `${voiceTimeLong * 7 + 120}px` }">
-		<img :src="playState ? pause : play" alt="" @click="changePlayState" />
+	<div class="player" >
+		<!-- <img :src="playState ? pause : play" alt="" @click="changePlayState" />
 		<span>{{ `${dayjs(timeDayJs).format("mm:ss")}` }}</span>
-		<div class="lines" id="player-lines"></div>
-		<!-- <audio
-        controls
-        :src="voiceUrl">
-            Your browser does not support the
-            <code>audio</code> element.
-    </audio> -->
+		<div class="lines" id="player-lines"></div> -->
+		<audio controls :src="voiceUrl" style="height:40px;">
+			Your browser does not support the
+			<code>audio</code> element.
+		</audio>
 	</div>
 </template>
 <script setup lang="ts">
@@ -93,15 +91,15 @@ watch(playedTime, (value, old) => {
 		clearTimeout(timer || undefined);
 	}
 });
-onMounted(() => {
-	linesNode.value = document.querySelector("#player-lines");
-	//console.log(linesNode.value)
-});
+// onMounted(() => {
+// 	linesNode.value = document.querySelector("#player-lines");
+// 	//console.log(linesNode.value)
+// });
 </script>
 
 <style lang="less" scoped>
 .player {
-	background-color: var(--el-color-info-dark-2);
+	// background-color: var(--el-color-info-dark-2);
 	height: 32px;
 	border-radius: 20px;
 	display: flex;

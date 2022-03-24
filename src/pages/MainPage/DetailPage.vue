@@ -53,7 +53,7 @@ const showText = ref(false)
 const playState = ref(0);
 
 // 音频地址
-const voiceUrl = ref(`../../assets/4461c2ce0c64dd14.mp3`);
+const voiceUrl = 'https://graduation-project-1257750000.cos.ap-chengdu.myqcloud.com/voice/4461c2ce0c64dd14.mp3';
 
 // 播放的时长
 const playedTime = ref(0)

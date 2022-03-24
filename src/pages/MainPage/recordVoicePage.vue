@@ -3,10 +3,17 @@
 		<el-upload
 			ref="uploadRef"
 			class="upload-demo"
-			action="https://jsonplaceholder.typicode.com/posts/"
+			action="/test/upload"
 			:auto-upload="false"
 			:on-error="uploadFail"
-			:on-success="uploadSuccess"
+			:on-success="open"
+			:before-upload="beforeAvatarUpload"
+			:on-change="changeFile"
+			name="voiceFile"
+			:data="{
+				fileName: fileData.name,
+				fileSize: fileData.size,
+			}"
 		>
 			<template #trigger>
 				<el-button type="primary">点击选择文件</el-button>
@@ -22,66 +29,74 @@
 </template>
 <script setup lang="ts">
 import { reactive, ref } from "vue";
-import { UploadFilled } from "@element-plus/icons-vue";
 // @ts-ignore
-import { UploadRawFile, ElMessage, ElUpload, ElMessageBox } from "element-plus";
+import { UploadRawFile, ElUpload, ElMessageBox } from "element-plus";
 import { UploadFile } from "element-plus/es/components/upload/src/upload.type";
 import { useRouter } from "vue-router";
+import { errorTip } from "../../tools";
+import { uploadApi } from "./api";
 const uploadRef = ref<InstanceType<typeof ElUpload>>();
-const router = useRouter()
+const router = useRouter();
+
+const fileData = reactive({
+	name: "",
+	size: "",
+});
+
+const fileUpload = ref();
 const beforeAvatarUpload = (file: UploadRawFile) => {
-	console.log(file.type);
+	console.log(file);
 	const isJPG = file.type === "audio/mpeg";
 	const isLt2M = file.size / 1024 / 1024 < 2;
 
 	if (!isJPG) {
-		ElMessage.error("请上传音频文件");
+		errorTip("请上传音频文件");
 	}
 	// if (!isLt2M) {
 	// 	ElMessage.error("Avatar picture size can not exceed 2MB!");
 	// }
 	return isJPG && isLt2M;
 };
+
+function changeFile(file: UploadRawFile) {
+	fileData.name = file.name;
+	fileData.size = file.size;
+	fileUpload.value = file;
+	console.log(file);
+}
 const submitUpload = () => {
-	// uploadRef.value!.submit();
-    open()
+	uploadRef.value!.submit();
 };
 
 function uploadFail(error: any, file: UploadFile, fileList: UploadFile[]) {
-	// console.log(arguments)
-	ElMessage.error("文件上传失败");
+	errorTip("上传失败");
 }
 
-function uploadSuccess(
-	response: any,
-	file: UploadFile,
-	fileList: UploadFile[]
-) {
-	ElMessage.error("文件上传成功");
-}
-
-function open() {
-	ElMessageBox.confirm("上传成功，是否进行质检?", "", {
-		confirmButtonText: "确定",
-		cancelButtonText: "取消",
-		type: "success",
-	})
-		.then(() => {
-			ElMessage({
-				type: "success",
-				message: "Delete completed",
-			});
-            router.push({
-                path:'/main/detail',
-                query:{id:12}
-            })
+function open(res: any) {
+	// console.log(res);
+	if (res.code === 200) {
+		ElMessageBox.confirm("上传成功，是否进行质检?", "", {
+			confirmButtonText: "确定",
+			cancelButtonText: "取消",
+			type: "success",
 		})
-		.catch(() => {
-			ElMessage({
-				type: "info",
-				message: "Delete canceled",
-			});
-		});
+			.then(() => {
+				router.push({
+					path: "/main/detail",
+					query: { id: res.data.fileId },
+				});
+			})
+			.catch(() => {});
+	}
+}
+
+async function uploadFile() {
+	console.log("123");
+	const data = await uploadApi({
+		voiceFile: fileUpload.value,
+		fileName: fileData.name,
+		fileSize: fileData.size,
+	});
 }
 </script>
 <style lang="less" scoped>
