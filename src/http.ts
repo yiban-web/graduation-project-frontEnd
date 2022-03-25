@@ -5,7 +5,7 @@ const baseURL = "http://localhost:3000/test";
 interface res {
 	code: number;
 	msg: string;
-	data?: Object;
+	data?: {[key:string]:any};
 }
 function http(
 	method: "GET" | "POST",

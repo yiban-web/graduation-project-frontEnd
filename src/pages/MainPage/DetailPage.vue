@@ -1,28 +1,34 @@
 <!-- 语音详情页 -->
 <template>
-	<div style="font-size: 0.85rem;">
+	<div style="font-size: 0.85rem">
 		<div class="back-box">
 			<img :src="back" alt="" srcset="" @click="goback" />
 			<span class="back" @click="goback">返回</span>
 		</div>
 		<p>{{ `语音详情 id=${voiceId}` }}</p>
-		<p>语音名称：<span>aushduiasbk.mp3</span></p>
+		<p>语音名称：<span>{{file.voiceName}}</span></p>
 		<voice-player
-			:voice-url="voiceUrl"
+			:voice-url="file.voiceUrl"
 			:voice-time-long="voiceTimeLong"
 		></voice-player>
-		<p class="grade">最终得分：<span>90</span></p>
-		<hr  SIZE=1 class="cut-off">
+		<p class="grade">最终得分：<span>{{file.voiceScore||'暂无'}}</span></p>
+		<hr SIZE="1" class="cut-off" />
 		<div class="keys-tags">
 			<p>关键字标签：</p>
 			<div class="keys-tags-all">
-				<div class='keys-tags-item' v-for="(item,index) in voiceTagsList" :key="index">
-					<span>{{item}}</span>
+				<div
+					class="keys-tags-item"
+					v-for="(item, index) in voiceTagsList"
+					:key="index"
+				>
+					<span>{{ item }}</span>
 				</div>
 			</div>
 		</div>
-		<hr  SIZE=1 class="cut-off">
-		<el-link type="info" @click="showText = !showText">{{`${showText?'关闭':'展开'}文本`}}</el-link>
+		<hr SIZE="1" class="cut-off" />
+		<el-link type="info" @click="showText = !showText">{{
+			`${showText ? "关闭" : "展开"}文本`
+		}}</el-link>
 		<div v-show="showText">
 			<!-- 具体文本显示 -->
 			<new-textarea></new-textarea>
@@ -32,42 +38,59 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
+
 // @ts-ignore
 import VoicePlayer from "../../components/VoicePlayer.vue";
 // @ts-ignore
-import NewTextarea from "../../components/NewTextarea.vue"
-import dayjs from "dayjs";
+import NewTextarea from "../../components/NewTextarea.vue";
+
 // @ts-ignore
 import back from "../../assets/back.png";
-// @ts-ignore
-import pause from "../../assets/pause.png";
-// @ts-ignore
-import play from "../../assets/play.png";
+import { getFilesDetail } from "./api";
+
 const voiceId = useRoute().query.id;
 const router = useRouter();
 const playerWidth = 200;
 
-const showText = ref(false)
+const showText = ref(false);
 
-// 播放状态，0暂停 1播放
-const playState = ref(0);
+const file = reactive({
+	voiceName: "",
+	voiceUrl: "",
+	voiceDuration: 0,
+	voiceTextUrl: "",
+	voiceScore: 0,
+	voiceId: 0,
+	voiceTags: "",
+});
 
-// 音频地址
-const voiceUrl = 'https://graduation-project-1257750000.cos.ap-chengdu.myqcloud.com/voice/4461c2ce0c64dd14.mp3';
 
 // 播放的时长
-const playedTime = ref(0)
+const playedTime = ref(0);
 
 // 音频总时长
 const voiceTimeLong = 16;
 
-const voiceTagsList = ['银行客服','公安']
+const voiceTagsList = ["银行客服", "公安"];
+
+getFilesDetail({
+	fileId: voiceId,
+}).then((res) => {
+	console.log(res);
+	if (res.code == 200) {
+		file.voiceName = res.data?.fileData.voiceName
+		file.voiceScore = res.data?.fileData.voiceScore
+		file.voiceTags = res.data?.fileData.voiceTags
+		file.voiceTextUrl = res.data?.fileData.voiceTextUrl
+		file.voiceUrl = res.data?.fileData.voiceUrl
+	}
+});
 
 function goback() {
 	router.go(-1);
 }
 </script>
-  
+
 <style lang="less" scoped>
 .back-box {
 	align-items: center;
@@ -101,17 +124,17 @@ function goback() {
 		flex-wrap: wrap;
 	}
 	&-item {
-		@color:#006699;
+		@color: #006699;
 		padding: 4px 6px;
 		// background-color: #0099CC;
 		border-radius: 10px;
 		box-shadow: 1px 1px 4px 1px #0099cca6;
 		margin-right: 12px;
 		border: @color solid 1px;
-		color:@color
+		color: @color;
 	}
 }
-.cut-off{
+.cut-off {
 	width: 100%;
 	color: var(--el-color-info-light-3);
 	margin-top: 15px;

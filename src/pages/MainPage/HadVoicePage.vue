@@ -6,17 +6,30 @@
 		<div>
 			<el-table :data="voiceList" stripe style="width: 100%" border>
 				<el-table-column type="index" width="50" />
-				<el-table-column prop="name" label="文件名" width="300" />
-				<el-table-column prop="timeLong" label="音频时长" width="180" />
-				<el-table-column prop="score" label="分数" />
+				<!-- <el-table-column prop="voiceName" label="文件名" width="300" /> -->
+				<el-table-column label="文件名" width="300">
+					<template #default="scope">
+						<p>{{ scope.row.voiceName || "暂无" }}</p>
+					</template>
+				</el-table-column>
+				<el-table-column label="音频时长" width="180">
+					<template #default="scope">
+						<p>{{ scope.row.voiceDuration || "暂无" }}</p>
+					</template>
+				</el-table-column>
+				<el-table-column label="分数" width="300">
+					<template #default="scope">
+						<p>{{ scope.row.voiceScore || "暂无" }}</p>
+					</template>
+				</el-table-column>
 				<el-table-column label="操作">
 					<template #default="scope">
-						<el-button size="small" @click="lookDetail(scope.row.id)"
+						<el-button size="small" @click="lookDetail(scope.row.voiceId)"
 							>查看详情</el-button
 						>
 						<el-popconfirm
 							title="确定删除此文件吗？"
-							@confirm="handleDelete(scope.row.id)"
+							@confirm="handleDelete(scope.row.voiceId)"
 							confirm-button-text="确定"
 							cancel-button-text="取消"
 						>
@@ -43,40 +56,44 @@
 <script setup lang="ts">
 import { onBeforeMount, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import { haveFilesNum } from "./api";
+import { successTip } from "../../tools";
+import { haveFilesNum, getFilesList, deleteFile } from "./api";
 const router = useRouter();
+
+// 文件总数
 const fileCount = ref(0);
+// 页码
 const pageCount = ref(0);
+// 一页展示数据量
 const pageSize = 10;
 
+// 文件数据项类型
+type File = {
+	voiceDuration: number | null;
+	voiceId: number;
+	voiceName: string;
+	voiceScore: number;
+};
+
+const voiceList = ref<File[]>([]);
+
+const pageNow = ref(0)
+
 // @ts-ignore
-onBeforeMount(async () => {
-	await haveFilesNum()
+onBeforeMount(() => {
+	haveFilesNum()
 		.then((res) => {
 			console.log(res);
 			if (res.code === 200) {
 				fileCount.value = res.data?.fileCount;
 				pageCount.value = Math.ceil(res.data?.fileCount / pageSize);
+				changePage(1);
 			}
 		})
 		.catch((err) => {
 			console.log(err);
 		});
 });
-const voiceList = [
-	{
-		id: 1,
-		name: "4161c2b213321650.mp3",
-		timeLong: "31s",
-		score: 95,
-	},
-	{
-		id: 2,
-		name: "4161c2b654235051.mp3",
-		timeLong: "1min31s",
-		score: 70,
-	},
-];
 function lookDetail(id: number) {
 	console.log(id);
 	router.push({
@@ -84,11 +101,26 @@ function lookDetail(id: number) {
 		query: { id },
 	});
 }
-function handleDelete(id: number) {
+async function handleDelete(id: number) {
 	console.log(id);
+	const data = await deleteFile({
+		fileId:id
+	})
+	if(data.code===200){
+		successTip('删除成功')
+		changePage(pageNow.value)
+	}
 }
-function changePage(pageNow: number) {
-	console.log(pageNow);
+async function changePage(page: number) {
+	console.log(page);
+	pageNow.value = page
+	const data = await getFilesList({
+		page,
+		pageSize,
+	});
+	if (data.code === 200) {
+		voiceList.value = data.data?.filesList;
+	}
 }
 </script>
 <style lang="less" scoped>
@@ -108,6 +140,6 @@ function changePage(pageNow: number) {
 .pageination {
 	display: flex;
 	justify-content: center;
-	margin-top: 10px;
+	margin: 10px 0;
 }
 </style>
