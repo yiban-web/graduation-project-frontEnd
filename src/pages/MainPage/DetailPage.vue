@@ -6,12 +6,16 @@
 			<span class="back" @click="goback">返回</span>
 		</div>
 		<p>{{ `语音详情 id=${voiceId}` }}</p>
-		<p>语音名称：<span>{{file.voiceName}}</span></p>
+		<p>
+			语音名称：<span>{{ file.voiceName }}</span>
+		</p>
 		<voice-player
 			:voice-url="file.voiceUrl"
 			:voice-time-long="voiceTimeLong"
 		></voice-player>
-		<p class="grade">最终得分：<span>{{file.voiceScore||'暂无'}}</span></p>
+		<p class="grade">
+			最终得分：<span>{{ file.voiceScore || "暂无" }}</span>
+		</p>
 		<hr SIZE="1" class="cut-off" />
 		<div class="keys-tags">
 			<p>关键字标签：</p>
@@ -26,12 +30,12 @@
 			</div>
 		</div>
 		<hr SIZE="1" class="cut-off" />
-		<el-link type="info" @click="showText = !showText">{{
+		<el-link type="info" @click="showTextArea">{{
 			`${showText ? "关闭" : "展开"}文本`
 		}}</el-link>
 		<div v-show="showText">
 			<!-- 具体文本显示 -->
-			<new-textarea></new-textarea>
+			<new-textarea :content="content"></new-textarea>
 		</div>
 	</div>
 </template>
@@ -46,7 +50,7 @@ import NewTextarea from "../../components/NewTextarea.vue";
 
 // @ts-ignore
 import back from "../../assets/back.png";
-import { getFilesDetail } from "./api";
+import { getFilesDetail, readTextFile } from "./api";
 
 const voiceId = useRoute().query.id;
 const router = useRouter();
@@ -64,7 +68,6 @@ const file = reactive({
 	voiceTags: "",
 });
 
-
 // 播放的时长
 const playedTime = ref(0);
 
@@ -73,21 +76,37 @@ const voiceTimeLong = 16;
 
 const voiceTagsList = ["银行客服", "公安"];
 
+const content = ref("");
+
 getFilesDetail({
 	fileId: voiceId,
 }).then((res) => {
 	console.log(res);
 	if (res.code == 200) {
-		file.voiceName = res.data?.fileData.voiceName
-		file.voiceScore = res.data?.fileData.voiceScore
-		file.voiceTags = res.data?.fileData.voiceTags
-		file.voiceTextUrl = res.data?.fileData.voiceTextUrl
-		file.voiceUrl = res.data?.fileData.voiceUrl
+		file.voiceName = res.data?.fileData.voiceName;
+		file.voiceScore = res.data?.fileData.voiceScore;
+		file.voiceTags = res.data?.fileData.voiceTags;
+		file.voiceTextUrl = res.data?.fileData.voiceTextUrl;
+		file.voiceUrl = res.data?.fileData.voiceUrl;
 	}
 });
 
 function goback() {
 	router.go(-1);
+}
+
+async function showTextArea() {
+	if (content.value === "" && !showText.value) {
+		const data = await readTextFile({
+			voiceTextUrl: file.voiceTextUrl,
+			voiceName: file.voiceName,
+		});
+		if (data.code === 200) {
+			content.value = data.data?.content;
+		}
+	}
+
+	showText.value = !showText.value;
 }
 </script>
 
