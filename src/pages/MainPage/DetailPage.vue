@@ -19,14 +19,17 @@
 		<hr SIZE="1" class="cut-off" />
 		<div class="keys-tags">
 			<p>关键字标签：</p>
-			<div class="keys-tags-all">
+			<div class="keys-tags-all" v-if="file.voiceTags.length!==0">
 				<div
 					class="keys-tags-item"
-					v-for="(item, index) in voiceTagsList"
+					v-for="(item, index) in file.voiceTags"
 					:key="index"
 				>
 					<span>{{ item }}</span>
 				</div>
+			</div>
+			<div v-else>
+				暂无标签
 			</div>
 		</div>
 		<hr SIZE="1" class="cut-off" />
@@ -85,7 +88,7 @@ getFilesDetail({
 	if (res.code == 200) {
 		file.voiceName = res.data?.fileData.voiceName;
 		file.voiceScore = res.data?.fileData.voiceScore;
-		file.voiceTags = res.data?.fileData.voiceTags;
+		file.voiceTags = res.data?.fileData.voiceTags===''?[]:res.data?.fileData.voiceTags.split(',');
 		file.voiceTextUrl = res.data?.fileData.voiceTextUrl;
 		file.voiceUrl = res.data?.fileData.voiceUrl;
 	}

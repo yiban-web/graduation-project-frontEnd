@@ -34,7 +34,7 @@ import { UploadRawFile, ElUpload, ElMessageBox } from "element-plus";
 import { UploadFile } from "element-plus/es/components/upload/src/upload.type";
 import { useRouter } from "vue-router";
 import { errorTip } from "../../tools";
-import { uploadApi } from "./api";
+import { uploadApi,countGrade } from "./api";
 const uploadRef = ref<InstanceType<typeof ElUpload>>();
 const router = useRouter();
 
@@ -80,11 +80,14 @@ function open(res: any) {
 			cancelButtonText: "取消",
 			type: "success",
 		})
-			.then(() => {
-				router.push({
-					path: "/main/detail",
-					query: { id: res.data.fileId },
-				});
+			.then(async () => {
+				const data = await countGrade({
+					id:res.data.fileId
+				})
+				// router.push({
+				// 	path: "/main/detail",
+				// 	query: { id: res.data.fileId },
+				// });
 			})
 			.catch(() => {});
 	}
