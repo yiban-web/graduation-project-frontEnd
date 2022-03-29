@@ -14,7 +14,7 @@
 				</el-table-column>
 				<el-table-column label="音频时长" width="180">
 					<template #default="scope">
-						<p>{{ scope.row.voiceDuration || "暂无" }}</p>
+						<p>{{ showDuration(scope.row.voiceDuration)}}</p>
 					</template>
 				</el-table-column>
 				<el-table-column label="分数" width="300">
@@ -54,6 +54,7 @@
 	</div>
 </template>
 <script setup lang="ts">
+import dayjs from "dayjs";
 import { onBeforeMount, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { successTip } from "../../tools";
@@ -77,7 +78,7 @@ type File = {
 
 const voiceList = ref<File[]>([]);
 
-const pageNow = ref(0)
+const pageNow = ref(0);
 
 // @ts-ignore
 onBeforeMount(() => {
@@ -101,19 +102,28 @@ function lookDetail(id: number) {
 		query: { id },
 	});
 }
+
+function showDuration(value: number) {
+	if(value === 0){
+		return '暂无'
+	}
+	return dayjs()
+		.minute(value / 60)
+		.second(value % 60).format('mm分ss秒');
+}
 async function handleDelete(id: number) {
 	console.log(id);
 	const data = await deleteFile({
-		fileId:id
-	})
-	if(data.code===200){
-		successTip('删除成功')
-		changePage(pageNow.value)
+		fileId: id,
+	});
+	if (data.code === 200) {
+		successTip("删除成功");
+		changePage(pageNow.value);
 	}
 }
 async function changePage(page: number) {
 	console.log(page);
-	pageNow.value = page
+	pageNow.value = page;
 	const data = await getFilesList({
 		page,
 		pageSize,

@@ -5,7 +5,7 @@
 			<img :src="back" alt="" srcset="" @click="goback" />
 			<span class="back" @click="goback">返回</span>
 		</div>
-		<p>{{ `语音详情 id=${voiceId}` }}</p>
+		<!-- <p>{{ `语音详情 id=${voiceId}` }}</p> -->
 		<p>
 			语音名称：<span>{{ file.voiceName }}</span>
 		</p>
