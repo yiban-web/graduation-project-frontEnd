@@ -33,8 +33,8 @@ import { reactive, ref } from "vue";
 import { UploadRawFile, ElUpload, ElMessageBox } from "element-plus";
 import { UploadFile } from "element-plus/es/components/upload/src/upload.type";
 import { useRouter } from "vue-router";
-import { errorTip } from "../../tools";
-import { uploadApi,countGrade } from "./api";
+import { errorTip, loading } from "../../tools";
+import { uploadApi, countGrade } from "./api";
 const uploadRef = ref<InstanceType<typeof ElUpload>>();
 const router = useRouter();
 
@@ -64,8 +64,10 @@ function changeFile(file: UploadRawFile) {
 	fileUpload.value = file;
 	console.log(file);
 }
-const submitUpload = () => {
-	uploadRef.value!.submit();
+const submitUpload = async () => {
+	const load = loading('上传中')
+	await uploadRef.value!.submit();
+	load.close()
 };
 
 function uploadFail(error: any, file: UploadFile, fileList: UploadFile[]) {
@@ -81,25 +83,30 @@ function open(res: any) {
 			type: "success",
 		})
 			.then(async () => {
+				const load = loading('质量检测中')
 				const data = await countGrade({
-					id:res.data.fileId
-				})
-				// router.push({
-				// 	path: "/main/detail",
-				// 	query: { id: res.data.fileId },
-				// });
+					id: res.data.fileId,
+				});
+				if (data.code == 200) {
+					load.close()
+					router.push({
+						path: "/main/detail",
+						query: { id: res.data.fileId },
+					});
+				}
 			})
 			.catch(() => {});
 	}
 }
 
 async function uploadFile() {
-	console.log("123");
+	const load = loading('上传中')
 	const data = await uploadApi({
 		voiceFile: fileUpload.value,
 		fileName: fileData.name,
 		fileSize: fileData.size,
 	});
+	load.close()
 }
 </script>
 <style lang="less" scoped>

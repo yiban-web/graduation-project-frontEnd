@@ -54,6 +54,7 @@ import NewTextarea from "../../components/NewTextarea.vue";
 // @ts-ignore
 import back from "../../assets/back.png";
 import { getFilesDetail, readTextFile } from "./api";
+import { loading } from "../../tools";
 
 const voiceId = useRoute().query.id;
 const router = useRouter();
@@ -100,10 +101,12 @@ function goback() {
 
 async function showTextArea() {
 	if (content.value === "" && !showText.value) {
+		const load = loading('文本准备中')
 		const data = await readTextFile({
 			voiceTextUrl: file.voiceTextUrl,
 			voiceName: file.voiceName,
 		});
+		load.close()
 		if (data.code === 200) {
 			content.value = data.data?.content;
 		}

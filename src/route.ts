@@ -1,12 +1,15 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import log from "./pages/LogPage/index.vue";
 import register from "./pages/RegisterPage/index.vue";
-import Cookie from 'js-cookie'
+import Cookie from "js-cookie";
 import { errorTip } from "./tools";
 const routes = [
 	{
 		path: "/",
 		redirect: () => {
+			if (Cookie.get("username")) {
+				return { path: "/main/had" };
+			}
 			return { path: "/log" };
 		},
 	},
@@ -20,9 +23,9 @@ const routes = [
 		path: "/main",
 		name: "main",
 		component: import("./pages/MainPage/index.vue"),
-    register:()=>{
-      return {path:'main/had'}
-    },
+		register: () => {
+			return { path: "main/had" };
+		},
 		children: [
 			{
 				path: "had",
@@ -45,10 +48,10 @@ export const router = createRouter({
 });
 
 // 判断是否进行了登录
-router.beforeEach((to,from,next)=>{
-    if(to.path.indexOf('main')!==-1&&!Cookie.get('username')){
-        errorTip('请进行登录')
-        next({path:'/log'})
-    }
-    next()
-})
+router.beforeEach((to, from, next) => {
+	if (to.path.indexOf("main") !== -1 && !Cookie.get("username")) {
+		errorTip("请进行登录");
+		next({ path: "/log" });
+	}
+	next();
+});

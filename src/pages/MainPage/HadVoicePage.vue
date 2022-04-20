@@ -1,10 +1,27 @@
 <template>
 	<div>
-		<div class="tag">
-			<p>现已有音频数据</p>
+		<div class="head">
+			<div class="tag">
+				<p>现已有音频数据</p>
+			</div>
+			<div class="select">
+				<el-input v-model="selectValue" placeholder="输入文件名称" clearable />
+				<el-button plain class="btn" @click="slelctFiles">搜索</el-button>
+			</div>
 		</div>
 		<div>
-			<el-table :data="voiceList" stripe style="width: 100%" border>
+			<el-table
+				:data="voiceList"
+				stripe
+				style="width: 100%"
+				border
+				empty-text="暂无数据"
+
+				row-class-name="rowClass"
+				:row-style="rowStyle"
+				:cell-style="rowStyle"
+				:header-cell-style="headerStyle"
+			>
 				<el-table-column type="index" width="50" />
 				<!-- <el-table-column prop="voiceName" label="文件名" width="300" /> -->
 				<el-table-column label="文件名" width="300">
@@ -14,7 +31,7 @@
 				</el-table-column>
 				<el-table-column label="音频时长" width="180">
 					<template #default="scope">
-						<p>{{ showDuration(scope.row.voiceDuration)}}</p>
+						<p>{{ showDuration(scope.row.voiceDuration) }}</p>
 					</template>
 				</el-table-column>
 				<el-table-column label="分数" width="300">
@@ -40,7 +57,7 @@
 					</template>
 				</el-table-column>
 			</el-table>
-			<div class="pageination">
+			<div class="pageination" v-show="!selectValue">
 				<el-pagination
 					:page-size="10"
 					:pager-count="pageCount"
@@ -48,6 +65,7 @@
 					background
 					:total="fileCount"
 					@current-change="changePage"
+					:current-page ="pageNow"
 				/>
 			</div>
 		</div>
@@ -55,11 +73,12 @@
 </template>
 <script setup lang="ts">
 import dayjs from "dayjs";
-import { onBeforeMount, reactive, ref } from "vue";
+import { onBeforeMount, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { successTip } from "../../tools";
-import { haveFilesNum, getFilesList, deleteFile } from "./api";
+import { haveFilesNum, getFilesList, deleteFile,selectFiles } from "./api";
 const router = useRouter();
+
 
 // 文件总数
 const fileCount = ref(0);
@@ -78,7 +97,23 @@ type File = {
 
 const voiceList = ref<File[]>([]);
 
-const pageNow = ref(0);
+const pageNow = ref(1);
+
+const selectValue = ref("");
+
+const rowStyle = {
+	padding:'0',
+	textAlign: 'center'
+}
+const headerStyle = {
+	textAlign: 'center'
+}
+
+watch(selectValue,(val,oldVal)=>{
+	if(!val){
+		changePage(1)
+	}
+})
 
 // @ts-ignore
 onBeforeMount(() => {
@@ -88,7 +123,7 @@ onBeforeMount(() => {
 			if (res.code === 200) {
 				fileCount.value = res.data?.fileCount;
 				pageCount.value = Math.ceil(res.data?.fileCount / pageSize);
-				changePage(1);
+				changePage(parseInt(sessionStorage.getItem('page')||'1'));
 			}
 		})
 		.catch((err) => {
@@ -97,19 +132,31 @@ onBeforeMount(() => {
 });
 function lookDetail(id: number) {
 	console.log(id);
+	sessionStorage.setItem('page',pageNow.value+'')
 	router.push({
 		path: "/main/detail",
 		query: { id },
 	});
 }
 
+async function slelctFiles(){
+	const data = await selectFiles({
+		fileName:selectValue.value
+	})
+	if (data.code === 200) {
+		voiceList.value = data.data?.filesList;
+		if(data.msg)successTip(data.msg)
+	}
+}
+
 function showDuration(value: number) {
-	if(value === 0){
-		return '暂无'
+	if (value === 0) {
+		return "暂无";
 	}
 	return dayjs()
 		.minute(value / 60)
-		.second(value % 60).format('mm分ss秒');
+		.second(value % 60)
+		.format("mm分ss秒");
 }
 async function handleDelete(id: number) {
 	console.log(id);
@@ -134,6 +181,20 @@ async function changePage(page: number) {
 }
 </script>
 <style lang="less" scoped>
+.head{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	
+}
+.select{
+	width: 40%;
+	display: flex;
+	.btn{
+		margin-left: 20px;
+	}
+
+}
 .tag {
 	background-color: #f19f4d;
 	width: 10%;
@@ -151,5 +212,8 @@ async function changePage(page: number) {
 	display: flex;
 	justify-content: center;
 	margin: 10px 0;
+}
+.rowClass{
+	height: 10px;
 }
 </style>
