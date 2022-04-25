@@ -1,8 +1,13 @@
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory} from "vue-router";
 import log from "./pages/LogPage/index.vue";
 import register from "./pages/RegisterPage/index.vue";
 import Cookie from "js-cookie";
 import { errorTip } from "./tools";
+import Main from './pages/MainPage/index.vue'
+import HadFiles from './pages/MainPage/HadVoicePage.vue'
+import UploadFile from "./pages/MainPage/recordVoicePage.vue";
+import FileDetail from './pages/MainPage/DetailPage.vue'
+import StatsScore from './pages/StatsScorsPage/index.vue'
 const routes = [
 	{
 		path: "/",
@@ -19,31 +24,36 @@ const routes = [
 		name: "register",
 		component: register,
 	},
+	
 	{
 		path: "/main",
 		name: "main",
-		component: import("./pages/MainPage/index.vue"),
+		component: Main,
 		register: () => {
 			return { path: "main/had" };
 		},
 		children: [
 			{
 				path: "had",
-				component: import("./pages/MainPage/HadVoicePage.vue"),
+				component: HadFiles,
 			},
 			{
 				path: "record",
-				component: import("./pages/MainPage/recordVoicePage.vue"),
+				component: UploadFile,
 			},
 			{
 				path: "detail",
-				component: import("./pages/MainPage/DetailPage.vue"),
+				component: FileDetail,
+			},
+			{
+				path:'statsScore',
+				component:StatsScore
 			},
 		],
 	},
 ];
 export const router = createRouter({
-	history: createWebHashHistory(),
+	history: createWebHistory('/h5/'),
 	routes,
 });
 

@@ -6,7 +6,7 @@ import "element-plus/dist/index.css";
 import {router} from './route'
 
 createApp({
-	template: ` <router-view></router-view>`,
+	template: `<router-view></router-view>`,
 })
 	.use(router)
 	.mount("#app");

@@ -3,7 +3,7 @@
 		<div class="head">
 			<p class="head-title">大规模语音数据智能质检系统</p>
 			<div class="head-user" @click="logout">
-				<p>您好，{{username}}</p>
+				<p>您好，{{ username }}</p>
 				<img :src="退出" alt="" srcset="" />
 			</div>
 		</div>
@@ -40,11 +40,12 @@ const router = useRouter();
 const barList = [
 	{ path: "had", name: "已有数据", id: 1 },
 	{ path: "record", name: "上传文件", id: 2 },
+	{ path: "statsScore", name: "分数统计", id: 3 },
 ];
 
 const choosedBar = ref(0);
 
-const username = Cookies.get('username')
+const username = Cookies.get("username");
 
 function goto(path: string, id: number) {
 	choosedBar.value = id;
@@ -60,7 +61,7 @@ function logout() {
 		type: "warning",
 	})
 		.then(() => {
-			Cookies.remove('username')
+			Cookies.remove("username");
 			router.replace({
 				path: `/log`,
 			});

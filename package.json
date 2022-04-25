@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -16,6 +16,7 @@
     "@vue/shared": "^3.2.31",
     "axios": "^0.26.1",
     "dayjs": "^1.11.0",
+    "echarts": "^5.3.2",
     "element-plus": "^2.0.4",
     "js-cookie": "^3.0.1",
     "less": "^4.1.2",
