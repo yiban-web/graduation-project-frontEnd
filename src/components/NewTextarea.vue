@@ -1,6 +1,7 @@
 <template>
 	<div class="textarea">
-		{{ content }}
+		<!-- {{ content }} -->
+		<slot></slot>
 	</div>
 </template>
 <script setup lang="ts">
@@ -15,6 +16,8 @@ const prop = defineProps({
 		default:""
 	}
 })
+
+const datas = `<p class='text'>1231231<span>123</span></p>`
 </script>
 <style lang="less" scoped>
 .textarea {
@@ -28,5 +31,8 @@ const prop = defineProps({
 	margin-bottom: 15px;
 	color: #464444;
 	// text-align: center;
+}
+.text{
+	color:red;
 }
 </style>

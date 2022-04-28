@@ -8,6 +8,7 @@
 		<!-- <p>{{ `语音详情 id=${voiceId}` }}</p> -->
 		<p>
 			语音名称：<span>{{ file.voiceName }}</span>
+			<span @click="dialogFormVisible = true" class="re-name">更改</span>
 		</p>
 		<voice-player
 			:voice-url="file.voiceUrl"
@@ -19,7 +20,7 @@
 		<hr SIZE="1" class="cut-off" />
 		<div class="keys-tags">
 			<p>关键字标签：</p>
-			<div class="keys-tags-all" v-if="file.voiceTags.length!==0">
+			<div class="keys-tags-all" v-if="file.voiceTags.length !== 0">
 				<div
 					class="keys-tags-item"
 					v-for="(item, index) in file.voiceTags"
@@ -28,9 +29,7 @@
 					<span>{{ item }}</span>
 				</div>
 			</div>
-			<div v-else>
-				暂无标签
-			</div>
+			<div v-else>暂无标签</div>
 		</div>
 		<hr SIZE="1" class="cut-off" />
 		<el-link type="info" @click="showTextArea">{{
@@ -38,8 +37,33 @@
 		}}</el-link>
 		<div v-show="showText">
 			<!-- 具体文本显示 -->
-			<new-textarea :content="content"></new-textarea>
+			<new-textarea :content="content">
+				<!-- <p style="color:red;">1231231<span style="color:black;">123</span></p> -->
+				<!-- {{doc}} -->
+				<div slot="txt" v-html="doc"></div>
+			</new-textarea>
 		</div>
+		<el-dialog v-model="dialogFormVisible" title="修改文件名">
+			<div style="width: 80%">
+				<new-input
+					:label="inputOb.label"
+					:regular="inputOb.regular"
+					:placeholder="file.voiceName"
+					@getValue="inputOb.getValue"
+					:errText="inputOb.errText"
+					:clearable="inputOb.clearable"
+				>
+				</new-input>
+			</div>
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="dialogFormVisible = false">取消</el-button>
+					<el-button type="primary" :disabled="!newName.state" @click="reName"
+						>确定</el-button
+					>
+				</span>
+			</template>
+		</el-dialog>
 	</div>
 </template>
 <script setup lang="ts">
@@ -53,14 +77,16 @@ import NewTextarea from "../../components/NewTextarea.vue";
 
 // @ts-ignore
 import back from "../../assets/back.png";
-import { getFilesDetail, readTextFile } from "./api";
-import { loading } from "../../tools";
+import { getFilesDetail, readTextFile, reFileName } from "./api";
+import { loading, successTip } from "../../tools";
 
 const voiceId = useRoute().query.id;
 const router = useRouter();
 const playerWidth = 200;
 
 const showText = ref(false);
+
+const dialogFormVisible = ref(false);
 
 const file = reactive({
 	voiceName: "",
@@ -69,8 +95,18 @@ const file = reactive({
 	voiceTextUrl: "",
 	voiceScore: 0,
 	voiceId: 0,
-	voiceTags: "",
+	voiceTags: [],
 });
+
+const inputOb = {
+	label: "文件名",
+	placeholder: file.voiceName,
+	getValue: getNewName,
+	regular: "^([^\s]){1,11}$",
+	errText: "文件名不能包含空格",
+	showPassword: false,
+	clearable: true,
+};
 
 // 播放的时长
 const playedTime = ref(0);
@@ -82,6 +118,16 @@ const voiceTagsList = ["银行客服", "公安"];
 
 const content = ref("");
 
+const newName = reactive({
+	value: "",
+	state: false,
+});
+const doc = ref("");
+function getNewName(params: string, state: boolean) {
+	newName.value = params.split(".mp3")[0] + ".mp3";
+	newName.state = state;
+}
+
 getFilesDetail({
 	fileId: voiceId,
 }).then((res) => {
@@ -89,7 +135,10 @@ getFilesDetail({
 	if (res.code == 200) {
 		file.voiceName = res.data?.fileData.voiceName;
 		file.voiceScore = res.data?.fileData.voiceScore;
-		file.voiceTags = res.data?.fileData.voiceTags===''?[]:res.data?.fileData.voiceTags.split(',');
+		file.voiceTags =
+			res.data?.fileData.voiceTags === ""
+				? []
+				: res.data?.fileData.voiceTags.split(",");
 		file.voiceTextUrl = res.data?.fileData.voiceTextUrl;
 		file.voiceUrl = res.data?.fileData.voiceUrl;
 	}
@@ -101,18 +150,46 @@ function goback() {
 
 async function showTextArea() {
 	if (content.value === "" && !showText.value) {
-		const load = loading('文本准备中')
+		const load = loading("文本准备中");
 		const data = await readTextFile({
 			voiceTextUrl: file.voiceTextUrl,
 			voiceName: file.voiceName,
 		});
-		load.close()
+
+		// doc.innerHTML = `<p style="color:red;">1231231<span style="color:black;">123</span></p>`
+		load.close();
 		if (data.code === 200) {
 			content.value = data.data?.content;
+			buildTxt(data.data?.content);
 		}
 	}
 
 	showText.value = !showText.value;
+}
+
+// 重新组装展示文本
+function buildTxt(content: string) {
+	let res = `<p>${content}</p>`;
+	// tag数组中放置关键字开始与结束下标
+	let tag: number[][] = [];
+	file.voiceTags.map((item: any, index) => {
+		const slicing: string[] = res.split(item);
+		res = slicing.join(`<span style="color:#EE2C2C;font-weight: 600;">${item}</span>`);
+	});
+	doc.value = res;
+	return res;
+}
+
+async function reName() {
+	const data = await reFileName({
+		fileId: voiceId,
+		newName: newName.value,
+	});
+	if (data.code == 200) {
+		successTip("修改成功");
+		file.voiceName = newName.value;
+		dialogFormVisible.value = false;
+	}
 }
 </script>
 
@@ -134,6 +211,16 @@ async function showTextArea() {
 	margin-left: 5px;
 }
 
+.re-name {
+	margin-left: 20px;
+	font-size: 0.7rem;
+	color: #6699cc;
+	cursor: pointer;
+}
+.re-name:hover {
+	color: #006699;
+}
+
 .grade {
 	span {
 		font-size: 1.4rem;
@@ -149,19 +236,26 @@ async function showTextArea() {
 		flex-wrap: wrap;
 	}
 	&-item {
-		@color: #006699;
-		padding: 4px 6px;
+		@color: #8b7e66e9;
+		padding: 6px 10px;
 		// background-color: #0099CC;
 		border-radius: 10px;
-		box-shadow: 1px 1px 4px 1px #0099cca6;
+		// box-shadow: 1px 1px 4px 1px #0099cca6;
 		margin-right: 12px;
-		border: @color solid 1px;
-		color: @color;
+		// border: @color solid 1px;
+		// color: @color;
+		background-color: @color;
+		color: white;
 	}
 }
+
 .cut-off {
 	width: 100%;
 	color: var(--el-color-info-light-3);
 	margin-top: 15px;
+}
+
+.key-word {
+	color: red;
 }
 </style>

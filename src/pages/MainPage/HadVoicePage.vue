@@ -26,7 +26,7 @@
 				<!-- <el-table-column prop="voiceName" label="文件名" width="300" /> -->
 				<el-table-column label="文件名" width="300">
 					<template #default="scope">
-						<p>{{ scope.row.voiceName || "暂无" }}</p>
+						<p >{{ scope.row.voiceName || "暂无" }}</p>
 					</template>
 				</el-table-column>
 				<el-table-column label="音频时长" width="180">

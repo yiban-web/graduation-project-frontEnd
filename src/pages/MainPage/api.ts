@@ -17,3 +17,5 @@ export const readTextFile = (params: object) => post("/readTextFile", params);
 export const countGrade = (params:object)=>post(`/countGrade`,params)
 
 export const selectFiles =  (params:any)=>get(`/selectFiles?name=${params?.fileName}`,{})
+
+export const reFileName = (params:object)=>post(`/reFileName`,params)
