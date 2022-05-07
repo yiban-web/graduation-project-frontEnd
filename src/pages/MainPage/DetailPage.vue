@@ -20,10 +20,24 @@
 		<hr SIZE="1" class="cut-off" />
 		<div class="keys-tags">
 			<p>关键字标签：</p>
-			<div class="keys-tags-all" v-if="file.voiceTags.length !== 0">
+			<div class="keys-tags-all" v-if="file.keyTags.length !== 0">
 				<div
 					class="keys-tags-item"
-					v-for="(item, index) in file.voiceTags"
+					v-for="(item, index) in file.keyTags"
+					:key="index"
+				>
+					<span>{{ item }}</span>
+				</div>
+			</div>
+			<div v-else>暂无标签</div>
+		</div>
+		<hr SIZE="1" class="cut-off" />
+		<div class="keys-tags">
+			<p>盲呼标签：</p>
+			<div class="keys-tags-all" v-if="file.blindCall.length !== 0">
+				<div
+					class="keys-tags-item"
+					v-for="(item, index) in file.blindCall"
 					:key="index"
 				>
 					<span>{{ item }}</span>
@@ -79,6 +93,7 @@ import NewTextarea from "../../components/NewTextarea.vue";
 import back from "../../assets/back.png";
 import { getFilesDetail, readTextFile, reFileName } from "./api";
 import { loading, successTip } from "../../tools";
+import { fi } from "element-plus/lib/locale";
 
 const voiceId = useRoute().query.id;
 const router = useRouter();
@@ -96,6 +111,8 @@ const file = reactive({
 	voiceScore: 0,
 	voiceId: 0,
 	voiceTags: [],
+	blindCall:[],
+	keyTags:[]
 });
 
 const inputOb = {
@@ -135,12 +152,18 @@ getFilesDetail({
 	if (res.code == 200) {
 		file.voiceName = res.data?.fileData.voiceName;
 		file.voiceScore = res.data?.fileData.voiceScore;
-		file.voiceTags =
-			res.data?.fileData.voiceTags === ""
-				? []
-				: res.data?.fileData.voiceTags.split(",");
+		file.voiceTags = res.data?.fileData.voiceTags
 		file.voiceTextUrl = res.data?.fileData.voiceTextUrl;
 		file.voiceUrl = res.data?.fileData.voiceUrl;
+		res.data?.fileData.voiceTags.map((item:any,index:any)=>{
+			if(item.type==='keyWord'){
+				file.keyTags.push(item.value)
+			}
+			else{
+				file.blindCall.push(item.value)
+			}
+		})
+		console.log(file.keyTags)
 	}
 });
 
@@ -169,12 +192,18 @@ async function showTextArea() {
 
 // 重新组装展示文本
 function buildTxt(content: string) {
+	const orange = '#FF9900'
+	const red = '#EE2C2C'
+	content += `<p style="color:#666666">注意：<span style="color:${red}">红色</span>为关键字标签，<span style="color:${orange}">橙色</span>为盲呼标签</p>`
 	let res = `<p>${content}</p>`;
+	
 	// tag数组中放置关键字开始与结束下标
 	let tag: number[][] = [];
 	file.voiceTags.map((item: any, index) => {
-		const slicing: string[] = res.split(item);
-		res = slicing.join(`<span style="color:#EE2C2C;font-weight: 600;">${item}</span>`);
+		const slicing: string[] = res.split(item.value);
+		res = slicing.join(
+			`<span style="color:${item.type=='keyWord'?red:orange};font-weight: 600;">${item.value}</span>`
+		);
 	});
 	doc.value = res;
 	return res;
