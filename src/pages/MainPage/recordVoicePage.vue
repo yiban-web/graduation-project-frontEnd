@@ -79,7 +79,7 @@ import {
 } from "element-plus";
 import { UploadFile } from "element-plus/es/components/upload/src/upload.type";
 import { useRouter } from "vue-router";
-import { errorTip, loading } from "../../tools";
+import { errorTip, loading, successTip } from "../../tools";
 import { uploadApi, countGrade } from "./api";
 const uploadRef = ref<InstanceType<typeof ElUpload>>();
 const router = useRouter();
@@ -119,7 +119,6 @@ function changeFile(file: UploadRawFile, uploadFiles: UploadFiles) {
 const submitUpload = async () => {
 	const load = loading("上传中");
 	await uploadRef.value!.submit();
-	load.close();
 };
 
 function uploadFail(error: any, file: UploadFile, fileList: UploadFile[]) {
@@ -127,15 +126,21 @@ function uploadFail(error: any, file: UploadFile, fileList: UploadFile[]) {
 }
 
 async function open(res: any) {
-	// console.log(res);
+	if(res.code===0){
+		errorTip('上传失败')
+		const load = loading("");
+		load.close()
+		return
+	}
 	if (res.code === 200) {
+		successTip('上传成功')
 		const load = loading("质量检测中");
 		const data = await countGrade({
 			id: res.data.fileId,
 		});
 		load.close();
 		if (data.code == 200) {
-			
+			successTip("质检成功");
 			if (fileNum.value == 1) {
 				router.push({
 					path: "/main/detail",
@@ -157,13 +162,13 @@ async function open(res: any) {
 }
 
 async function uploadFile() {
-	const load = loading("上传中");
+	const load = loading("上传中123");
 	const data = await uploadApi({
 		voiceFile: fileUpload.value,
 		fileName: fileData.name,
 		fileSize: fileData.size,
 	});
-	load.close();
+	// load.close();
 }
 </script>
 <style lang="less" scoped>

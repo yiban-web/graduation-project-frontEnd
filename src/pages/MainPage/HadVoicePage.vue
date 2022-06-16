@@ -22,7 +22,7 @@
 				:cell-style="rowStyle"
 				:header-cell-style="headerStyle"
 			>
-				<el-table-column type="index" width="50" />
+				<el-table-column type="index" width="50" :index="indexMethod" />
 				<!-- <el-table-column prop="voiceName" label="文件名" width="300" /> -->
 				<el-table-column label="文件名" width="300">
 					<template #default="scope">
@@ -44,6 +44,9 @@
 						<el-button size="small" @click="lookDetail(scope.row.voiceId)"
 							>查看详情</el-button
 						>
+						<el-button size="small" @click="reExam(scope.row.voiceId)"
+							>重新质检</el-button
+						>
 						<el-popconfirm
 							title="确定删除此文件吗？"
 							@confirm="handleDelete(scope.row.voiceId)"
@@ -59,7 +62,7 @@
 			</el-table>
 			<div class="pageination" v-show="!selectValue">
 				<el-pagination
-					:page-size="10"
+					:page-size="pageSize"
 					:pager-count="pageCount"
 					layout="prev, pager, next"
 					background
@@ -75,8 +78,8 @@
 import dayjs from "dayjs";
 import { onBeforeMount, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import { successTip } from "../../tools";
-import { haveFilesNum, getFilesList, deleteFile,selectFiles } from "./api";
+import { loading, successTip } from "../../tools";
+import { haveFilesNum, getFilesList, deleteFile,selectFiles,reExamFile } from "./api";
 const router = useRouter();
 
 
@@ -85,7 +88,7 @@ const fileCount = ref(0);
 // 页码
 const pageCount = ref(0);
 // 一页展示数据量
-const pageSize = 10;
+const pageSize = 8;
 
 // 文件数据项类型
 type File = {
@@ -130,6 +133,10 @@ onBeforeMount(() => {
 			console.log(err);
 		});
 });
+
+function indexMethod(index:number){
+	return (pageNow.value-1)*pageSize+index+1
+}
 function lookDetail(id: number) {
 	console.log(id);
 	sessionStorage.setItem('page',pageNow.value+'')
@@ -137,6 +144,19 @@ function lookDetail(id: number) {
 		path: "/main/detail",
 		query: { id },
 	});
+}
+
+// 重新质检
+async function reExam(id:number){
+	const load = loading('质检中')
+	const data = await reExamFile({
+		id:id
+	})
+	load.close()
+	if(data.code===200){
+		changePage(pageNow.value);
+	}
+
 }
 
 async function slelctFiles(){
@@ -217,3 +237,11 @@ async function changePage(page: number) {
 	height: 10px;
 }
 </style>
+
+function reExamFile(arg0: { id: number; }) {
+  throw new Error("Function not implemented.");
+}
+
+function reExamFile(arg0: { id: number; }) {
+  throw new Error("Function not implemented.");
+}

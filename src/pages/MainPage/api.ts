@@ -19,3 +19,5 @@ export const countGrade = (params:object)=>post(`/countGrade`,params)
 export const selectFiles =  (params:any)=>get(`/selectFiles?name=${params?.fileName}`,{})
 
 export const reFileName = (params:object)=>post(`/reFileName`,params)
+
+export const reExamFile = (params:any)=>get(`/reExam?id=${params?.id}`,{})

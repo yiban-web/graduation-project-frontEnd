@@ -6,8 +6,8 @@
 			<span class="back" @click="goback">返回</span>
 		</div>
 		<!-- <p>{{ `语音详情 id=${voiceId}` }}</p> -->
-		<p>
-			语音名称：<span>{{ file.voiceName }}</span>
+		<p >
+			<span class="title-sec">语音名称：</span><span>{{ file.voiceName }}</span>
 			<span @click="dialogFormVisible = true" class="re-name">更改</span>
 		</p>
 		<voice-player
@@ -15,11 +15,11 @@
 			:voice-time-long="voiceTimeLong"
 		></voice-player>
 		<p class="grade">
-			最终得分：<span>{{ file.voiceScore || "暂无" }}</span>
+			<span class="title">最终得分：</span><span class="grade">{{ file.voiceScore || "暂无" }}</span>
 		</p>
 		<hr SIZE="1" class="cut-off" />
 		<div class="keys-tags">
-			<p>关键字标签：</p>
+			<p class="title-sec">关键字标签：</p>
 			<div class="keys-tags-all" v-if="file.keyTags.length !== 0">
 				<div
 					class="keys-tags-item"
@@ -29,11 +29,13 @@
 					<span>{{ item }}</span>
 				</div>
 			</div>
-			<div v-else>暂无标签</div>
+			<div v-else class="no-tags">
+				<p>暂无标签</p>
+			</div>
 		</div>
 		<hr SIZE="1" class="cut-off" />
 		<div class="keys-tags">
-			<p>盲呼标签：</p>
+			<p class="title-sec">盲呼标签：</p>
 			<div class="keys-tags-all" v-if="file.blindCall.length !== 0">
 				<div
 					class="keys-tags-item"
@@ -43,7 +45,9 @@
 					<span>{{ item }}</span>
 				</div>
 			</div>
-			<div v-else>暂无标签</div>
+			<div v-else class="no-tags">
+				<p>暂无标签</p>
+			</div>
 		</div>
 		<hr SIZE="1" class="cut-off" />
 		<el-link type="info" @click="showTextArea">{{
@@ -111,8 +115,8 @@ const file = reactive({
 	voiceScore: 0,
 	voiceId: 0,
 	voiceTags: [],
-	blindCall:[],
-	keyTags:[]
+	blindCall: [],
+	keyTags: [],
 });
 
 const inputOb = {
@@ -152,18 +156,17 @@ getFilesDetail({
 	if (res.code == 200) {
 		file.voiceName = res.data?.fileData.voiceName;
 		file.voiceScore = res.data?.fileData.voiceScore;
-		file.voiceTags = res.data?.fileData.voiceTags
+		file.voiceTags = res.data?.fileData.voiceTags;
 		file.voiceTextUrl = res.data?.fileData.voiceTextUrl;
 		file.voiceUrl = res.data?.fileData.voiceUrl;
-		res.data?.fileData.voiceTags.map((item:any,index:any)=>{
-			if(item.type==='keyWord'){
-				file.keyTags.push(item.value)
+		res.data?.fileData.voiceTags.map((item: any, index: any) => {
+			if (item.type === "keyWord") {
+				file.keyTags.push(item.value);
+			} else {
+				file.blindCall.push(item.value);
 			}
-			else{
-				file.blindCall.push(item.value)
-			}
-		})
-		console.log(file.keyTags)
+		});
+		console.log(file.keyTags);
 	}
 });
 
@@ -192,17 +195,17 @@ async function showTextArea() {
 
 // 重新组装展示文本
 function buildTxt(content: string) {
-	const orange = '#FF9900'
-	const red = '#EE2C2C'
-	content += `<p style="color:#666666">注意：<span style="color:${red}">红色</span>为关键字标签，<span style="color:${orange}">橙色</span>为盲呼标签</p>`
+	const orange = "#FF9900";
+	const red = "#EE2C2C";
+	content += `<p style="color:#666666">注意：<span style="color:${red}">红色</span>为关键字标签，<span style="color:${orange}">橙色</span>为盲呼标签</p>`;
 	let res = `<p>${content}</p>`;
-	
-	// tag数组中放置关键字开始与结束下标
-	let tag: number[][] = [];
+
 	file.voiceTags.map((item: any, index) => {
 		const slicing: string[] = res.split(item.value);
 		res = slicing.join(
-			`<span style="color:${item.type=='keyWord'?red:orange};font-weight: 600;">${item.value}</span>`
+			`<span style="color:${
+				item.type == "keyWord" ? red : orange
+			};font-weight: 600;">${item.value}</span>`
 		);
 	});
 	doc.value = res;
@@ -233,6 +236,10 @@ async function reName() {
 		height: 20px;
 	}
 }
+
+.title-sec{
+	font-weight: 600;
+}
 .back {
 	color: var(--el-color-info-light-3);
 	font-size: 0.8rem;
@@ -251,7 +258,10 @@ async function reName() {
 }
 
 .grade {
-	span {
+	span.title{
+		font-weight: 600;
+	}
+	span.grade {
 		font-size: 1.4rem;
 		font-weight: 600;
 		color: #ff9900;
@@ -265,7 +275,7 @@ async function reName() {
 		flex-wrap: wrap;
 	}
 	&-item {
-		@color: #8b7e66e9;
+		@color: #336699;
 		padding: 6px 10px;
 		// background-color: #0099CC;
 		border-radius: 10px;
@@ -275,6 +285,18 @@ async function reName() {
 		// color: @color;
 		background-color: @color;
 		color: white;
+		font-size: 0.7rem;
+	}
+	.no-tags {
+		padding: 6px 10px;
+		display: inline-block;
+		background-color: var(--el-color-info-light-5);
+		border-radius: 10px;
+		font-size: 0.7rem;
+		color: #393a3c;
+		p{
+			margin: 0;
+		}
 	}
 }
 
