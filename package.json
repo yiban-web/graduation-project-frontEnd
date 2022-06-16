@@ -11,6 +11,7 @@
     "vue": "^3.2.25"
   },
   "devDependencies": {
+    "@element-plus/icons-vue": "^2.0.4",
     "@types/js-cookie": "^3.0.1",
     "@vitejs/plugin-vue": "^2.2.0",
     "@vue/shared": "^3.2.31",

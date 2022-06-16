@@ -6,7 +6,7 @@
 			<span class="back" @click="goback">返回</span>
 		</div>
 		<!-- <p>{{ `语音详情 id=${voiceId}` }}</p> -->
-		<p >
+		<p>
 			<span class="title-sec">语音名称：</span><span>{{ file.voiceName }}</span>
 			<span @click="dialogFormVisible = true" class="re-name">更改</span>
 		</p>
@@ -15,7 +15,8 @@
 			:voice-time-long="voiceTimeLong"
 		></voice-player>
 		<p class="grade">
-			<span class="title">最终得分：</span><span class="grade">{{ file.voiceScore || "暂无" }}</span>
+			<span class="title">最终得分：</span
+			><span class="grade">{{ file.voiceScore || "暂无" }}</span>
 		</p>
 		<hr SIZE="1" class="cut-off" />
 		<div class="keys-tags">
@@ -50,9 +51,33 @@
 			</div>
 		</div>
 		<hr SIZE="1" class="cut-off" />
-		<el-link type="info" @click="showTextArea">{{
-			`${showText ? "关闭" : "展开"}文本`
-		}}</el-link>
+		<div class="show-text">
+			<el-link type="info" @click="showTextArea">{{
+				`${showText ? "关闭" : "展开"}文本`
+			}}</el-link>
+			<el-tooltip
+				:content="tooltipText"
+				raw-content
+				effect="light"
+			>
+				<svg
+					t="1655386708117"
+					class="icon"
+					viewBox="0 0 1024 1024"
+					version="1.1"
+					xmlns="http://www.w3.org/2000/svg"
+					p-id="2769"
+					width="32"
+					height="32"
+				>
+					<path
+						d="M512 64C264.8 64 64 264.8 64 512s200.8 448 448 448 448-200.8 448-448S759.2 64 512 64z m32 704h-64v-64h64v64z m11.2-203.2l-5.6 4.8c-3.2 2.4-5.6 8-5.6 12.8v58.4h-64v-58.4c0-24.8 11.2-48 29.6-63.2l5.6-4.8c56-44.8 83.2-68 83.2-108C598.4 358.4 560 320 512 320c-49.6 0-86.4 36.8-86.4 86.4h-64C361.6 322.4 428 256 512 256c83.2 0 150.4 67.2 150.4 150.4 0 72.8-49.6 112.8-107.2 158.4z"
+						p-id="2770"
+						fill="#707070"
+					></path>
+				</svg>
+			</el-tooltip>
+		</div>
 		<div v-show="showText">
 			<!-- 具体文本显示 -->
 			<new-textarea :content="content">
@@ -61,6 +86,8 @@
 				<div slot="txt" v-html="doc"></div>
 			</new-textarea>
 		</div>
+
+		<!-- 修改文件名模态框 -->
 		<el-dialog v-model="dialogFormVisible" title="修改文件名">
 			<div style="width: 80%">
 				<new-input
@@ -144,6 +171,9 @@ const newName = reactive({
 	state: false,
 });
 const doc = ref("");
+const orange = "#FF9900";
+const red = "#EE2C2C";
+const tooltipText = `<p style="color:#666666;margin:0;">注意：<span style="color:${red}">红色</span>为关键字标签，<span style="color:${orange}">橙色</span>为盲呼标签</p>`;
 function getNewName(params: string, state: boolean) {
 	newName.value = params.split(".mp3")[0] + ".mp3";
 	newName.state = state;
@@ -195,9 +225,7 @@ async function showTextArea() {
 
 // 重新组装展示文本
 function buildTxt(content: string) {
-	const orange = "#FF9900";
-	const red = "#EE2C2C";
-	content += `<p style="color:#666666">注意：<span style="color:${red}">红色</span>为关键字标签，<span style="color:${orange}">橙色</span>为盲呼标签</p>`;
+	// content += `<p style="color:#666666">注意：<span style="color:${red}">红色</span>为关键字标签，<span style="color:${orange}">橙色</span>为盲呼标签</p>`;
 	let res = `<p>${content}</p>`;
 
 	file.voiceTags.map((item: any, index) => {
@@ -237,7 +265,7 @@ async function reName() {
 	}
 }
 
-.title-sec{
+.title-sec {
 	font-weight: 600;
 }
 .back {
@@ -258,7 +286,7 @@ async function reName() {
 }
 
 .grade {
-	span.title{
+	span.title {
 		font-weight: 600;
 	}
 	span.grade {
@@ -294,7 +322,7 @@ async function reName() {
 		border-radius: 10px;
 		font-size: 0.7rem;
 		color: #393a3c;
-		p{
+		p {
 			margin: 0;
 		}
 	}
@@ -308,5 +336,13 @@ async function reName() {
 
 .key-word {
 	color: red;
+}
+
+.show-text {
+	display: flex;
+	svg {
+		width: 16px;
+		margin-left: 15px;
+	}
 }
 </style>
